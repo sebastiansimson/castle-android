@@ -1,6 +1,6 @@
 language: android
 jdk: oraclejdk8
-sudo: false
+sudo: true
 
 before_cache:
     - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -37,7 +37,6 @@ before_script:
     - adb shell input keyevent 82 &
 
 script: 
-    - android list targets
     - ./gradlew connectedAndroidTest
 
 before_install:
@@ -45,3 +44,5 @@ before_install:
 
 after_success:
     - codecov                       #Run codecov
+    
+after_failure: "cat $TRAVIS_BUILD_DIR/app/build/outputs/lint-results-debug.xml"    
