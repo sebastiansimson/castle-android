@@ -14,7 +14,7 @@ android:
   - extra-android-m2repository
   - sys-img-${ANDROID_ABI}-${ANDROID_TARGET}
 script:
-  - ./gradlew build assembleAndroidTest
+  - ./gradlew build jacocoTestReport assembleAndroidTest
   - echo no | android create avd --force -n test -t $ANDROID_TARGET --abi $ANDROID_ABI
   - emulator -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator
@@ -26,6 +26,6 @@ before_install:
   - pip install --user codecov    #Install codecov
   
 after_success:
-    - codecov                       #Run codecov
-
-after_failure: "cat $TRAVIS_BUILD_DIR/app/build/outputs/lint-results-debug.xml"    
+  - bash <(curl -s https://codecov.io/bash) 
+  
+  
