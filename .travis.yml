@@ -24,6 +24,7 @@ before_install:
   - pip install --user codecov    #Install codecov
   
 after_success:
+- codecov                       #Run codecov    
   - bash <(curl -s https://codecov.io/bash) 
-  
-  
+
+after_failure: "cat $TRAVIS_BUILD_DIR/app/build/outputs/lint-results-debug.xml"
