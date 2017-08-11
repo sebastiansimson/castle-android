@@ -1,9 +1,17 @@
 language: android
 jdk: oraclejdk8
+cache:
+  directories:
+    - $HOME/.gradle/caches/2.9
+    - $HOME/.gradle/daemon
+    - $HOME/.gradle/native
+    - $HOME/.gradle/wrapper
 env:
   global:
     - ANDROID_TARGET=android-14
     - ANDROID_ABI=armeabi-v7a
+    - GRADLE_OPTS="-Xmx512m -XX:MaxPermSize=512m"
+    - ADB_INSTALL_TIMEOUT=8
 android:
   components:
   - tools
@@ -14,21 +22,14 @@ android:
   - extra-android-m2repository
   - sys-img-${ANDROID_ABI}-${ANDROID_TARGET}
 script:
-  - ./gradlew build assembleAndroidTest
   - echo no | android create avd --force -n test -t $ANDROID_TARGET --abi $ANDROID_ABI
   - emulator -avd test -no-skin -no-audio -no-window &
   - android-wait-for-emulator
+  - adb shell input keyevent 82 &
   - adb shell setprop dalvik.vm.dexopt-flags v=n,o=v
-  - android-wait-for-emulator
-  - ./gradlew connectedCheck
-  - android-wait-for-emulator
-  - ./gradlew jacocoTestReport connectedAndroidTest -PdisablePreDex --stacktrace
-
-before_install:
-  - pip install --user codecov    #Install codecov
-  
+  - ./gradlew connectedAndroidTest jacocoTestReport
 after_success:
-    - codecov                       #Run codecov
-    - bash <(curl -s https://codecov.io/bash) 
-
+    - pip install --user codecov
+    - codecov
+    - bash <(curl -s https://codecov.io/bash)
 after_failure: "cat $TRAVIS_BUILD_DIR/app/build/outputs/lint-results-debug.xml"
